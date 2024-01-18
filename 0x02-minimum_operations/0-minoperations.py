@@ -2,7 +2,9 @@
 """ a method that calculates the fewest number of operations
 needed to result in exactly n H characters """
 
+
 def minOperations(n):
+    """ find the character H """
     if n <= 1:
         return 0
 
