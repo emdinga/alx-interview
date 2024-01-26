@@ -1,37 +1,43 @@
-#!/usr/bin/python3
-""" Log parsing """
-
-
+#!/usr/bin/env python3
+"""Script that reads stdin line by line"""
 import sys
 
 
+def print_status(dict, size):
+    """Print the format"""
+    print("File size: {}".format(size))
+    for key in sorted(dict.keys()):
+        if dict[key] != 0:
+            print("{}: {}".format(key, dict[key]))
 
-file_size_total = 0
-status_code_counts = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+
+status_dict = {'200': 0, '301': 0, '400': 0, '401': 0, '403': 0,
+               '404': 0, '405': 0, '500': 0}
+
+file_size = 0
+count = 0
 
 try:
-    for i, line in enumerate(sys.stdin, 1):
-        try:
-            _, _, _, status_code_str, file_size_str = line.split()[-5:]
-            status_code = int(status_code_str)
-            file_size = int(file_size_str)
-            file_size_total += file_size
-            status_code_counts[status_code] += 1
-        except (ValueError, IndexError):
-            print(f"Skipping line {i}: Invalid format - {line.strip()}")
-            continue
+    for line in sys.stdin:
+        if count != 0 and count % 10 == 0:
+            print_status(status_dict, file_size)
 
-        if i % 10 == 0:
-            print(f"File size: {file_size_total}")
-            for code in sorted(status_code_counts):
-                if status_code_counts[code] > 0:
-                    print(f"{code}: {status_code_counts[code]}")
+        el = line.split(" ")
+        count += 1
+
+        try:
+            file_size += int(el[-1])
+        except:
+            pass
+
+        try:
+            if el[-2] in status_dict.keys():
+                status_dict[el[-2]] += 1
+        except:
+            pass
+    print_status(status_dict, file_size)
+
 
 except KeyboardInterrupt:
-    print(f"\nFile size: {file_size_total}")
-    for code in sorted(status_code_counts):
-        if status_code_counts[code] > 0:
-            print(f"{code}: {status_code_counts[code]}")
-    print("KeyboardInterrupt")
-
-
+    print_status(status_dict, file_size)
+    raise
